@@ -24,7 +24,7 @@
 // beta25 = 4092 K, R25 = 50 kOhm, Pull-up = 4.7 kOhm, "TDK NTC B57540G 8403"
 // Datasheet: https://www.tdk-electronics.tdk.com.cn/inf/50/db/ntc_09/Glass_enc_Sensors__B57540__G540__G1540.pdf
 // Generated using Marlin 2.0 Thermistor Table Generator https://www.thingiverse.com/thing:3300383
-const short temptable_13[][2] PROGMEM = {
+const short temptable_14[][2] PROGMEM = {
   { OV(  6.07),  350 },
   { OV(  6.43),  345 },
   { OV(  6.84),  340 },
