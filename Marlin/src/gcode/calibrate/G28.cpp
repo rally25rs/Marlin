@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -133,7 +133,7 @@
     destination.set(safe_homing_xy, current_position.z);
 
     #if HOMING_Z_WITH_PROBE
-      destination -= probe_offset_xy;
+      destination -= probe.offset_xy;
     #endif
 
     if (position_is_reachable(destination)) {
@@ -405,6 +405,7 @@ void GcodeSuite::G28(const bool always_home_all) {
 
     // Home Z last if homing towards the bed
     #if Z_HOME_DIR < 0
+
       if (doZ) {
         #if ENABLED(BLTOUCH)
           bltouch.init();
@@ -416,10 +417,17 @@ void GcodeSuite::G28(const bool always_home_all) {
         #endif
 
         #if HOMING_Z_WITH_PROBE && defined(Z_AFTER_PROBING)
-          move_z_after_probing();
+          #if Z_AFTER_HOMING > Z_AFTER_PROBING
+            do_blocking_move_to_z(Z_AFTER_HOMING);
+          #else
+            probe.move_z_after_probing();
+          #endif
+        #elif defined(Z_AFTER_HOMING)
+          do_blocking_move_to_z(Z_AFTER_HOMING);
         #endif
 
       } // doZ
+
     #endif // Z_HOME_DIR < 0
 
     sync_plan_position();
@@ -530,14 +538,14 @@ void GcodeSuite::G28(const bool always_home_all) {
     // Set L6470 absolute position registers to counts
     // constexpr *might* move this to PROGMEM.
     // If not, this will need a PROGMEM directive and an accessor.
-    static constexpr AxisEnum L6470_axis_xref[MAX_L6470] = {
+    static constexpr AxisEnum L64XX_axis_xref[MAX_L64XX] = {
       X_AXIS, Y_AXIS, Z_AXIS,
       X_AXIS, Y_AXIS, Z_AXIS, Z_AXIS,
       E_AXIS, E_AXIS, E_AXIS, E_AXIS, E_AXIS, E_AXIS
     };
     for (uint8_t j = 1; j <= L64XX::chain[0]; j++) {
       const uint8_t cv = L64XX::chain[j];
-      L64xxManager.set_param((L64XX_axis_t)cv, L6470_ABS_POS, stepper.position(L6470_axis_xref[cv]));
+      L64xxManager.set_param((L64XX_axis_t)cv, L6470_ABS_POS, stepper.position(L64XX_axis_xref[cv]));
     }
   #endif
 }

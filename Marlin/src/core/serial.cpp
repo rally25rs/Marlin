@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -29,7 +29,7 @@ static const char errormagic[] PROGMEM = "Error:";
 static const char echomagic[]  PROGMEM = "echo:";
 
 #if NUM_SERIAL > 1
-  int8_t serial_port_index = SERIAL_PORT;
+  int8_t serial_port_index = 0;
 #endif
 
 void serialprintPGM(PGM_P str) {

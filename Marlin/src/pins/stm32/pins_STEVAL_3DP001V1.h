@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (c) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
@@ -48,8 +48,6 @@
   #define MACHINE_NAME "STEVAL-3DP001V1"
 #endif
 
-#define TIMER_TONE  5
-
 //
 // Limit Switches
 //
@@ -68,18 +66,10 @@
 //  #define Z_MIN_PROBE_PIN  16  // PA4
 //#endif
 
-#define SCK_PIN            13   // PB13    SPI_S
-#define MISO_PIN           12   // PB14    SPI_M
-#define MOSI_PIN           11   // PB15    SPI_M
-
-#define L6470_CHAIN_SCK_PIN  17   // PA5
-#define L6470_CHAIN_MISO_PIN 18   // PA6
-#define L6470_CHAIN_MOSI_PIN 19   // PA7
-#define L6470_CHAIN_SS_PIN   16   // PA4
-
-//#define SCK_PIN   L6470_CHAIN_SCK_PIN
-//#define MISO_PIN  L6470_CHAIN_MISO_PIN
-//#define MOSI_PIN  L6470_CHAIN_MOSI_PIN
+//
+// Filament runout
+//
+//#define FIL_RUNOUT_PIN     53   // PA3    BED_THE
 
 //
 // Steppers
@@ -124,19 +114,34 @@
 #define E4_CS_PIN          16  // PA4     SPI_CS
 #define E5_CS_PIN          16  // PA4     SPI_CS
 
+#if HAS_L64XX
+  #define L6470_CHAIN_SCK_PIN  17   // PA5
+  #define L6470_CHAIN_MISO_PIN 18   // PA6
+  #define L6470_CHAIN_MOSI_PIN 19   // PA7
+  #define L6470_CHAIN_SS_PIN   16   // PA4
+
+  //#define SCK_PIN        L6470_CHAIN_SCK_PIN
+  //#define MISO_PIN       L6470_CHAIN_MISO_PIN
+  //#define MOSI_PIN       L6470_CHAIN_MOSI_PIN
+#else
+  //#define SCK_PIN        13   // PB13    SPI_S
+  //#define MISO_PIN       12   // PB14    SPI_M
+  //#define MOSI_PIN       11   // PB15    SPI_M
+#endif
+
 /**
- * macro to reset/enable L6474 chips
+ * Macro to reset/enable L6474 stepper drivers
  *
- * IMPORTANT - to disable (bypass) a L6474, install the corresponding
- *             resistor (R11 - R17) and change the "V" to zero for the
- *             corresponding pin.
+ * IMPORTANT - To disable (bypass) L6474s, install the corresponding
+ *             resistors (R11 - R17) and change the "V" to "0" for the
+ *             corresponding pins here:
  */
-#define ENABLE_RESET_L64XX_CHIPS(V)   do{OUT_WRITE(X_ENABLE_PIN, V);\
-                                         OUT_WRITE(Y_ENABLE_PIN, V);\
-                                         OUT_WRITE(Z_ENABLE_PIN, V);\
-                                         OUT_WRITE(E0_ENABLE_PIN,V);\
-                                         OUT_WRITE(E1_ENABLE_PIN,V);\
-                                         OUT_WRITE(E2_ENABLE_PIN,V);\
+#define ENABLE_RESET_L64XX_CHIPS(V)   do{ OUT_WRITE(X_ENABLE_PIN, V); \
+                                          OUT_WRITE(Y_ENABLE_PIN, V); \
+                                          OUT_WRITE(Z_ENABLE_PIN, V); \
+                                          OUT_WRITE(E0_ENABLE_PIN,V); \
+                                          OUT_WRITE(E1_ENABLE_PIN,V); \
+                                          OUT_WRITE(E2_ENABLE_PIN,V); \
                                         }while(0)
 
 //
@@ -146,7 +151,7 @@
 #define TEMP_1_PIN          4   // Analog input 4,  digital pin 55   PA1     E2_THERMISTOR
 #define TEMP_2_PIN          5   // Analog input 5,  digital pin 56   PA2     E3_THERMISTOR
 #define TEMP_BED_PIN        0   // Analog input 0,  digital pin 51   PC2     BED_THERMISTOR_1
-#define TEMP_BED_1_PIN      1`  // Analog input 1,  digital pin 52   PC3     BED_THERMISTOR_2
+#define TEMP_BED_1_PIN      1   // Analog input 1,  digital pin 52   PC3     BED_THERMISTOR_2
 #define TEMP_BED_2_PIN      2   // Analog input 2,  digital pin 53   PA3     BED_THERMISTOR_3
 
 //
@@ -171,7 +176,7 @@
 #define LED_PIN            -1   // 9 // PE1 green LED   Heart beat
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
-#define PWR_LOSS           -1   // Power loss / nAC_FAULT
+#define POWER_LOSS_PIN     -1   // PWR_LOSS / nAC_FAULT
 
 //
 // LCD / Controller
@@ -187,11 +192,6 @@
 //#define BTN_EN1            57   // PC4     E1_FAN
 //#define BTN_EN2            58   // PC5     E2_FAN
 //#define BTN_ENC            52   // PC3     BED_THE
-
-//
-// Filament runout
-//
-//#define FIL_RUNOUT_PIN     53   // PA3    BED_THE
 
 //
 // Extension pins
@@ -225,14 +225,28 @@
 // 21   // PA14  JTAG_TCK/SWCLK
 // 22   // PB3   JTAG_TDO/SWO
 
-// SDCARD
-// 23   // PC8   SDIO_D0
-// 24   // PC9   SDIO_D1
-// 25   // PA15  SD_CARD_DETECT
-// 26   // PC10  SDIO_D2
-// 27   // PC11  SDIO_D3
-// 28   // PC12  SDIO_CK
-// 29   // PD2   SDIO_CMD
+//
+// Onboard SD support
+//
+#define SDIO_D0_PIN       23   // PC8   SDIO_D0
+#define SDIO_D1_PIN       24   // PC9   SDIO_D1
+//#define SD_CARD_DETECT_PIN 25   // PA15  SD_CARD_DETECT
+#define SDIO_D2_PIN       26   // PC10  SDIO_D2
+#define SDIO_D3_PIN       27   // PC11  SDIO_D3
+#define SDIO_CK_PIN       28   // PC12  SDIO_CK
+#define SDIO_CMD_PIN      29   // PD2   SDIO_CMD
+
+#if !defined(SDCARD_CONNECTION) || SDCARD_CONNECTION == ONBOARD
+  #define SDIO_SUPPORT     // Use SDIO for onboard SD
+
+  #ifndef SDIO_SUPPORT
+    #define SOFTWARE_SPI   // Use soft SPI for onboard SD
+    #define SDSS           SDIO_D3_PIN
+    #define SCK_PIN        SDIO_CK_PIN
+    #define MISO_PIN       SDIO_D0_PIN
+    #define MOSI_PIN       SDIO_CMD_PIN
+  #endif
+#endif
 
 // OTG
 // 30   // PA11  OTG_DM
